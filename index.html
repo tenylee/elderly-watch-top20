@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老年人健康手表TOP20排行榜</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f4f6fa; color: #1a1a2e; }
+  
+  /* Header */
+  .header { background: linear-gradient(135deg, #1a5276 0%, #2e86de 100%); color: white; padding: 40px 20px; text-align: center; }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 14px; opacity: 0.85; }
+  .header .tag { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 20px; font-size: 12px; margin-top: 12px; }
+
+  /* Filter bar */
+  .filter-bar { background: white; padding: 14px 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+  .filter-bar span { font-size: 13px; color: #666; font-weight: 500; }
+  .filter-btn { padding: 5px 14px; border: 1.5px solid #e0e0e0; border-radius: 20px; font-size: 12px; cursor: pointer; background: white; color: #444; transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { background: #2e86de; color: white; border-color: #2e86de; }
+  .sort-select { padding: 5px 12px; border: 1.5px solid #e0e0e0; border-radius: 20px; font-size: 12px; color: #444; background: white; cursor: pointer; }
+
+  /* Top 5 cards */
+  .top-section { padding: 24px 20px 0; }
+  .top-section h2 { font-size: 16px; color: #333; margin-bottom: 14px; font-weight: 600; }
+  .top-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+  
+  .watch-card {
+    background: white; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer; position: relative;
+  }
+  .watch-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+  
+  .rank-badge { position: absolute; top: 12px; left: 12px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; z-index: 2; }
+  .rank-1 { background: linear-gradient(135deg, #f12711, #ff9500); }
+  .rank-2 { background: linear-gradient(135deg, #8e8e8e, #c0c0c0); }
+  .rank-3 { background: linear-gradient(135deg, #c9935a, #dbb376); }
+  .rank-other { background: #2e86de; }
+
+  .card-img { width: 100%; height: 160px; object-fit: contain; background: #f8f9fc; display: block; }
+  .card-img-placeholder { width: 100%; height: 160px; background: #f0f2f8; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; font-size: 13px; }
+  .card-img-placeholder span { font-size: 32px; margin-bottom: 6px; }
+  
+  .card-body { padding: 14px; }
+  .card-rank { font-size: 11px; color: #999; margin-bottom: 4px; }
+  .card-name { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; line-height: 1.3; }
+  .card-price { font-size: 18px; font-weight: 700; color: #e74c3c; margin-bottom: 8px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #eef4ff; color: #2e86de; }
+  .tag.ai { background: #fff5f5; color: #e74c3c; }
+  .card-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #888; display: flex; justify-content: space-between; }
+  .card-footer .续航 { color: #27ae60; font-weight: 600; }
+
+  /* Full ranking table */
+  .table-section { padding: 24px 20px 40px; }
+  .table-section h2 { font-size: 16px; color: #333; margin-bottom: 14px; font-weight: 600; }
+  .rank-table { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+  .rank-table table { width: 100%; border-collapse: collapse; }
+  .rank-table th { background: #1a5276; color: white; padding: 12px 14px; font-size: 12px; font-weight: 600; text-align: left; }
+  .rank-table td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+  .rank-table tr:last-child td { border-bottom: none; }
+  .rank-table tr:hover td { background: #f8f9fc; }
+  .rank-table .rank-num { font-size: 16px; font-weight: 700; width: 36px; }
+  .rank-table .rank-1 td:first-child { color: #f12711; }
+  .rank-table .rank-2 td:first-child { color: #8e8e8e; }
+  .rank-table .rank-3 td:first-child { color: #c9935a; }
+  .rank-table .td-img { width: 50px; height: 38px; object-fit: contain; background: #f8f9fc; border-radius: 6px; }
+  .rank-table .td-img-placeholder { width: 50px; height: 38px; background: #f0f2f8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .rank-table .td-price { font-weight: 700; color: #e74c3c; font-size: 14px; }
+  .rank-table .td-ai { color: #e74c3c; font-weight: 600; font-size: 12px; }
+  .rank-table .td-battery { color: #27ae60; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .header h1 { font-size: 22px; }
+    .rank-table { overflow-x: auto; display: block; }
+    .rank-table table { min-width: 800px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧓 老年人健康手表 TOP20 排行榜</h1>
+  <p>电子手表 · 健康手表 · 智能手表 · AI手表</p>
+  <div class="tag">📊 数据来源：豆包AI整理 · 2026年5月</div>
+</div>
+
+<div class="filter-bar">
+  <span>筛选：</span>
+  <button class="filter-btn active" onclick="filterAll()">全部</button>
+  <button class="filter-btn" onclick="filterBrand('华为')">华为</button>
+  <button class="filter-btn" onclick="filterBrand('小米')">小米</button>
+  <button class="filter-btn" onclick="filterBrand('荣耀')">荣耀</button>
+  <button class="filter-btn" onclick="filterBrand('OPPO')">OPPO</button>
+  <button class="filter-btn" onclick="filterBrand('爱牵挂')">爱牵挂</button>
+  <button class="filter-btn" onclick="filterBrand('安顿')">安顿</button>
+  <select class="sort-select" onchange="sortTable(this.value)">
+    <option value="default">默认排序</option>
+    <option value="price-asc">价格 ↑ 低→高</option>
+    <option value="price-desc">价格 ↓ 高→低</option>
+    <option value="battery-desc">续航 ↑ 长→短</option>
+  </select>
+</div>
+
+<div class="top-section">
+  <h2>🏆 TOP 5 热门推荐</h2>
+  <div class="top-grid" id="topGrid"></div>
+</div>
+
+<div class="table-section">
+  <h2>📋 完整排名一览</h2>
+  <div class="rank-table">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th>排名</th>
+          <th>产品名称</th>
+          <th>参考售价</th>
+          <th>核心AI健康功能</th>
+          <th>特色实用配置</th>
+          <th>续航</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const watches = [
+  {rank:1, name:"华为 WATCH D2", price:"4188元", ai:"医疗级血压心电、心脑血管AI预警", config:"跌倒检测、远程监护", battery:"7天", brand:"华为", highlight:true},
+  {rank:2, name:"华为 WATCH GT5 Pro", price:"1988元", ai:"AI疲劳风险预警、健康数据分析", config:"大字体、长辈模式", battery:"14天", brand:"华为", highlight:true},
+  {rank:3, name:"小米 Watch S3", price:"699元", ai:"AI健康报告、体征智能分析", config:"蓝牙通话、语音助手", battery:"8天", brand:"小米", highlight:true},
+  {rank:4, name:"荣耀 Watch GS4", price:"899元", ai:"AI睡眠优化、健康异常提醒", config:"跌倒识别、数据共享", battery:"10天", brand:"荣耀", highlight:true},
+  {rank:5, name:"OPPO Watch 4 Pro", price:"1599元", ai:"AI心脏健康评估、血氧监测", config:"独立通话、简易界面", battery:"5天", brand:"OPPO", highlight:true},
+  {rank:6, name:"SKG 小警卫 S7", price:"1299元", ai:"心脑梗双AI预警、气囊血压检测", config:"自动呼救、精准测温", battery:"9天", brand:"SKG"},
+  {rank:7, name:"dido R40S Pro", price:"599元", ai:"无创血糖预判、心电AI筛查", config:"蓝牙通话、远程查看", battery:"12天", brand:"dido"},
+  {rank:8, name:"爱牵挂 S6", price:"499元", ai:"AI跌倒智能识别", config:"GPS定位、SOS一键呼救", battery:"15天", brand:"爱牵挂", highlight:true},
+  {rank:9, name:"喵医生 M1", price:"599元", ai:"跌倒报警、体征AI解读", config:"语音播报、简易操作", battery:"11天", brand:"喵医生"},
+  {rank:10, name:"安顿 4A Pro", price:"4999元", ai:"心脑疾病AI预判、呼吸筛查", config:"多维度身体监测", battery:"6天", brand:"安顿", highlight:true},
+  {rank:11, name:"vivo Watch 3", price:"799元", ai:"AI健康总结、异常预警", config:"蓝牙通话、长辈界面", battery:"10天", brand:"vivo"},
+  {rank:12, name:"柯思捷旗舰款", price:"699元", ai:"血脂尿酸AI检测、微体检分析", config:"NFC门禁、全天监测", battery:"13天", brand:"柯思捷"},
+  {rank:13, name:"HKVW 鸿蒙适配款", price:"599元", ai:"身体数据AI研判", config:"紧急呼叫、远程关爱", battery:"12天", brand:"HKVW"},
+  {rank:14, name:"索盈精准空腹款", price:"499元", ai:"多指标健康风险预警", config:"睡眠深度分析", battery:"14天", brand:"索盈"},
+  {rank:15, name:"智国者一键体检款", price:"459元", ai:"AI健康综合评估", config:"基础体征全天候监测", battery:"13天", brand:"智国者"},
+  {rank:16, name:"乐心医疗 MAMBO Watch8", price:"2199元", ai:"心脑血管AI风险提示", config:"专业心电记录", battery:"8天", brand:"乐心"},
+  {rank:17, name:"宜准 R7 老人版", price:"899元", ai:"运动健康AI分析", config:"大字体、蓝牙通话", battery:"9天", brand:"宜准"},
+  {rank:18, name:"好记星 G100", price:"399元", ai:"AI跌倒防护", config:"定位追踪、紧急拨号", battery:"16天", brand:"好记星"},
+  {rank:19, name:"360 老人手表 S2", price:"499元", ai:"安全防护AI判定", config:"双卫星定位、语音播报", battery:"14天", brand:"360"},
+  {rank:20, name:"埃微 iwown E10", price:"399元", ai:"健康数据智能解读", config:"长待机、简易操控", battery:"15天", brand:"埃微"}
+];
+
+// Image map - try to use real product images where available
+const imgMap = {
+  "华为 WATCH D2": "https://img10.vmallres.com/pimages/uomcdn/CN/pms/202412/gbom/6942110107024/428_428_BC5BF48F4F1E52BA7A0FAF8CD3E3D9F3.png",
+  "华为 WATCH GT5 Pro": "https://img10.vmallres.com/pimages/uomcdn/CN/pms/202501/gbom/6942100107035/428_428_8B5B5FA1E4A7F1B9D0E8F5A1C4D7B3A9.png",
+  "小米 Watch S3": "https://i02.app.mi.com/get/cover/1172000/1172615/428_428_progressive.png",
+  "荣耀 Watch GS4": "https://www.hihonor.com/content/dam/rcs/product/phone/honor-watch-gs-4/product-img.png",
+  "OPPO Watch 4 Pro": "https://image.oppofile.com/contents/202412/contentimg/20241225173047.png"
+};
+
+function getImgUrl(name) {
+  return imgMap[name] || "";
+}
+
+function buildTop5() {
+  const grid = document.getElementById('topGrid');
+  const top5 = watches.filter(w => w.highlight).slice(0, 5);
+  grid.innerHTML = top5.map((w, i) => `
+    <div class="watch-card" onclick="scrollToRank(${w.rank})">
+      <div class="rank-badge rank-${i+1}">${w.rank}</div>
+      ${getImgUrl(w.name) ? 
+        `<img class="card-img" src="${getImgUrl(w.name)}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-img-placeholder\\'><span>⌚</span>图片加载失败</div>'">` :
+        `<div class="card-img-placeholder"><span>⌚</span>图片待补</div>`
+      }
+      <div class="card-body">
+        <div class="card-rank">第${w.rank}名</div>
+        <div class="card-name">${w.name}</div>
+        <div class="card-price">${w.price}</div>
+        <div class="card-tags">
+          <span class="tag ai">🧠 ${w.ai.split('、')[0]}</span>
+          <span class="tag">🔋 ${w.battery}</span>
+        </div>
+        <div class="card-footer">
+          <span>${w.config.split('、')[0]}</span>
+          <span class="续航">⚡ ${w.battery}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function buildTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = data.map(w => `
+    <tr class="rank-${w.rank <= 3 ? w.rank : 'other'}" data-brand="${w.brand}">
+      <td class="rank-num">${w.rank}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${getImgUrl(w.name) ?
+            `<img class="td-img" src="${getImgUrl(w.name)}" loading="lazy" onerror="this.style.display='none'">` :
+            `<div class="td-img-placeholder">⌚</div>`
+          }
+          <div>
+            <div style="font-weight:700;color:#1a1a2e">${w.name}</div>
+            <div style="font-size:11px;color:#888;margin-top:2px">${w.brand}</div>
+          </div>
+        </div>
+      </td>
+      <td class="td-price">${w.price}</td>
+      <td class="td-ai">🧠 ${w.ai}</td>
+      <td style="color:#555;font-size:12px">${w.config}</td>
+      <td class="td-battery">⚡ ${w.battery}</td>
+    </tr>
+  `).join('');
+}
+
+let currentFilter = 'all';
+let currentSort = 'default';
+
+function filterAll() {
+  currentFilter = 'all';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  applyFilter();
+}
+
+function filterBrand(brand) {
+  currentFilter = brand;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  applyFilter();
+}
+
+function applyFilter() {
+  let data = watches;
+  if (currentFilter !== 'all') {
+    data = watches.filter(w => w.brand === currentFilter);
+  }
+  if (currentSort === 'price-asc') data = [...data].sort((a,b) => parseInt(a.price) - parseInt(b.price));
+  if (currentSort === 'price-desc') data = [...data].sort((a,b) => parseInt(b.price) - parseInt(a.price));
+  if (currentSort === 'battery-desc') data = [...data].sort((a,b) => parseInt(b.battery) - parseInt(a.battery));
+  buildTable(data);
+}
+
+function sortTable(val) {
+  currentSort = val;
+  applyFilter();
+}
+
+function scrollToRank(rank) {
+  document.querySelector(`tr[data-brand]`) || null;
+  const rows = document.querySelectorAll('#tableBody tr');
+  rows.forEach(row => {
+    const num = row.querySelector('.rank-num')?.innerText;
+    if (num == rank) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.style.background = '#eef4ff';
+      setTimeout(() => row.style.background = '', 1500);
+    }
+  });
+}
+
+buildTop5();
+buildTable(watches);
+</script>
+
+</body>
+</html>
